@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chip2System Lab</title>
+<meta name="description" content="SMDP-C2SD · VLSI Chips to Startup Lab — silicon tapeouts, RISC-V and FPGA research, and the startup pipeline out of Thapar Institute's ECE department.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#04060b;
+    --bg-raised:#070a12;
+    --surface: rgba(255,255,255,.035);
+    --surface-hi: rgba(255,255,255,.06);
+    --border: rgba(255,255,255,.10);
+    --border-hi: rgba(255,255,255,.22);
+    --text: #f2f5fb;
+    --text-dim: rgba(242,245,251,.64);
+    --text-faint: rgba(242,245,251,.40);
+    --signal: 79 212 255;   /* cyan */
+    --volt: 150 130 255;    /* purple */
+    --spark: 255 100 138;   /* pink */
+    --font-display:'Sora', ui-sans-serif, system-ui, sans-serif;
+    --font-body:'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* ---------- background circuitry ---------- */
+  body::before{
+    content:'';
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(var(--signal)/.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--signal)/.05) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, black 40%, transparent 85%);
+  }
+  body::after{
+    content:'';
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.045)' stroke-width='1.2'%3E%3Cpath d='M0 40 H70 V90 H140'/%3E%3Cpath d='M240 120 H170 V70 H120 V0'/%3E%3Cpath d='M0 200 H50 V150 H110 V190 H190'/%3E%3Cpath d='M240 220 H200 V170'/%3E%3Ccircle cx='140' cy='90' r='3'/%3E%3Ccircle cx='120' cy='0' r='3'/%3E%3Ccircle cx='50' cy='150' r='3'/%3E%3Ccircle cx='190' cy='190' r='3'/%3E%3Ccircle cx='170' cy='70' r='3'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat:repeat;
+    opacity:.7;
+  }
+
+  main, header, footer { position:relative; z-index:1; }
+
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:700; margin:0; text-wrap:balance; }
+  p{ margin:0; }
+  a{ color:inherit; }
+  ul{ margin:0; padding:0; list-style:none; }
+  img{ max-width:100%; display:block; }
+
+  ::selection{ background:rgba(var(--signal)/.35); color:#fff; }
+
+  .wrap{ max-width:1180px; margin-inline:auto; padding-inline:24px; }
+  @media (max-width:640px){ .wrap{ padding-inline:18px; } }
+
+  .mono-label{
+    font-family:var(--font-mono); font-size:.72rem; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase; color: rgb(var(--signal));
+  }
+
+  section{ padding-block: 88px; }
+  @media (max-width:640px){ section{ padding-block:56px; } }
+
+  .section-head{ margin-bottom:44px; max-width:680px; }
+  .section-head .eyebrow{ margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .section-head .eyebrow::before{
+    content:''; width:22px; height:1px; background:rgb(var(--signal)); display:inline-block;
+  }
+  .section-head h2{ font-size:clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing:-.02em; }
+  .section-head .sub{ margin-top:12px; color:var(--text-dim); font-size:1rem; max-width:60ch; }
+  .section-head.center{ margin-inline:auto; text-align:center; }
+  .section-head.center .eyebrow{ justify-content:center; }
+  .section-head.center .eyebrow::before{ display:none; }
+  .section-head.center .sub{ margin-inline:auto; }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:.85rem 1.6rem; border-radius:999px;
+    font-family:var(--font-mono); font-size:.8rem; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase;
+    text-decoration:none; white-space:nowrap;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    border:1px solid transparent; cursor:pointer;
+  }
+  .btn-primary{
+    background: rgb(var(--signal)); color:#03131c;
+    box-shadow:0 0 0 1px rgba(var(--signal)/.4), 0 12px 30px -12px rgba(var(--signal)/.6);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 0 0 1px rgba(var(--signal)/.6), 0 18px 34px -12px rgba(var(--signal)/.75); }
+  .btn-ghost{
+    background:rgba(255,255,255,.03); border-color:var(--border); color:var(--text);
+  }
+  .btn-ghost:hover{ border-color:rgba(var(--signal)/.5); color:rgb(var(--signal)); transform:translateY(-2px); }
+
+  /* ---------- nav ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(4,6,11,.78); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-row{ display:flex; align-items:center; justify-content:space-between; padding-block:14px; gap:16px; }
+  .brand{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+  .brand img{ width:34px; height:34px; object-fit:contain; filter:drop-shadow(0 0 10px rgba(var(--signal)/.35)); }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.15; }
+  .brand-text span{ font-family:var(--font-display); font-weight:700; font-size:.95rem; color:var(--text); }
+  .brand-text small{ font-family:var(--font-mono); font-size:.62rem; letter-spacing:.08em; color:var(--text-faint); }
+  .nav-links{ display:flex; gap:28px; }
+  .nav-links a{ font-size:.85rem; color:var(--text-dim); text-decoration:none; transition:color .15s; }
+  .nav-links a:hover{ color:rgb(var(--signal)); }
+  @media (max-width:860px){ .nav-links{ display:none; } }
+
+  /* ---------- hero ---------- */
+  .hero{ padding-top:76px; padding-bottom:70px; position:relative; }
+  .hero-inner{ max-width:920px; }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 14px; border-radius:999px;
+    background:rgba(var(--volt)/.12); border:1px solid rgba(var(--volt)/.35);
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+    color:#d9d3ff; margin-bottom:22px;
+  }
+  .badge .dot{ width:6px; height:6px; border-radius:50%; background:rgb(var(--spark)); box-shadow:0 0 8px rgb(var(--spark)); }
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 4.2rem); line-height:1.03; letter-spacing:-.03em;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(100deg, rgb(var(--signal)), rgb(var(--volt)) 60%, rgb(var(--spark)));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .hero .tagline{ margin-top:18px; font-size:1.15rem; color:var(--text-dim); max-width:60ch; }
+  .hero .inst{
+    margin-top:10px; font-family:var(--font-mono); font-size:.78rem; color:var(--text-faint);
+    letter-spacing:.02em;
+  }
+  .hero .btn-row{ display:flex; flex-wrap:wrap; gap:14px; margin-top:34px; }
+
+  .stat-strip{
+    margin-top:46px; display:grid; grid-template-columns:repeat(6,1fr);
+    border:1px solid var(--border); border-radius:14px; overflow:hidden;
+    background:rgba(255,255,255,.02);
+  }
+  .stat{ padding:18px 10px; text-align:center; border-right:1px solid var(--border); }
+  .stat:last-child{ border-right:none; }
+  .stat-n{ font-family:var(--font-display); font-size:1.6rem; font-weight:800; color:rgb(var(--signal)); }
+  .stat-l{ margin-top:4px; font-family:var(--font-mono); font-size:.62rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); }
+  @media (max-width:900px){ .stat-strip{ grid-template-columns:repeat(3,1fr); } .stat{ border-bottom:1px solid var(--border);} }
+  @media (max-width:520px){ .stat-strip{ grid-template-columns:repeat(2,1fr); } }
+
+  /* ---------- flow strip (real sequence) ---------- */
+  .flow-strip{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap;
+    border:1px solid var(--border); border-radius:14px;
+    background:linear-gradient(135deg, rgba(var(--signal)/.05), rgba(var(--volt)/.06));
+    padding:22px 26px; margin-bottom:46px;
+  }
+  .flow-step{ display:flex; align-items:center; gap:14px; }
+  .flow-idx{
+    font-family:var(--font-mono); font-size:.7rem; color:rgb(var(--signal));
+    border:1px solid rgba(var(--signal)/.4); border-radius:6px; padding:3px 7px;
+  }
+  .flow-name{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); }
+  .flow-arrow{ color:var(--text-faint); margin-inline:16px; font-family:var(--font-mono); }
+  @media (max-width:760px){ .flow-strip{ display:none; } }
+
+  /* ---------- generic grid & card ---------- */
+  .grid{ display:grid; gap:20px; }
+  .grid-3{ grid-template-columns:repeat(3,1fr); }
+  .grid-2{ grid-template-columns:repeat(2,1fr); }
+  @media (max-width:920px){ .grid-3{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px){ .grid-3, .grid-2{ grid-template-columns:1fr; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:26px; position:relative; overflow:hidden;
+    transition:transform .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .card:hover{ transform:translateY(-4px); border-color:var(--border-hi); background:var(--surface-hi); }
+  .card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:var(--ac, rgb(var(--signal)));
+  }
+  .card-code{ font-family:var(--font-mono); font-size:.7rem; color:var(--ac, rgb(var(--signal))); letter-spacing:.06em; margin-bottom:14px; display:inline-block; }
+  .card h3{ font-size:1.12rem; margin-bottom:8px; }
+  .card .desc{ color:var(--text-dim); font-size:.9rem; line-height:1.55; }
+  .card .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+
+  .tag{
+    font-family:var(--font-mono); font-size:.68rem; padding:4px 10px; border-radius:20px;
+    background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text-dim);
+    letter-spacing:.02em;
+  }
+  .tag.accent{ color:rgb(var(--signal)); border-color:rgba(var(--signal)/.35); background:rgba(var(--signal)/.08); }
+  .tag.status{ color:rgb(var(--spark)); border-color:rgba(var(--spark)/.4); background:rgba(var(--spark)/.08); }
+
+  .card-foot-row{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; gap:10px; flex-wrap:wrap; }
+
+  /* ---------- projects ---------- */
+  .bench-strip{
+    margin-top:28px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    border-top:1px dashed var(--border); padding-top:22px;
+  }
+  .bench-strip .lbl{ font-family:var(--font-mono); font-size:.68rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em; margin-right:6px; }
+
+  .side-list{ margin-top:20px; border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .side-row{
+    display:flex; gap:16px; padding:16px 20px; border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,.015);
+  }
+  .side-row:last-child{ border-bottom:none; }
+  .side-row .idx{ font-family:var(--font-mono); font-size:.72rem; color:rgb(var(--volt)); flex:0 0 auto; padding-top:2px;}
+  .side-row p{ color:var(--text-dim); font-size:.88rem; }
+  .side-row strong{ color:var(--text); font-weight:600; }
+
+  /* ---------- tapeouts ---------- */
+  .tapeout-banner{
+    font-family:var(--font-mono); font-size:.76rem; color:var(--text-dim);
+    border:1px solid var(--border); border-radius:10px; padding:10px 16px;
+    display:inline-flex; gap:8px; margin-bottom:32px; background:rgba(255,255,255,.02);
+  }
+  .tapeout-banner b{ color:rgb(var(--signal)); font-weight:600; }
+  .chip-card{ text-align:left; }
+  .chip-card .chip-visual{
+    height:64px; border:1px solid rgba(var(--volt)/.35); border-radius:8px; margin-bottom:16px;
+    background:
+      repeating-linear-gradient(90deg, rgba(var(--volt)/.18) 0 2px, transparent 2px 14px) top / 100% 6px no-repeat,
+      repeating-linear-gradient(90deg, rgba(var(--volt)/.18) 0 2px, transparent 2px 14px) bottom / 100% 6px no-repeat,
+      rgba(var(--volt)/.05);
+    position:relative;
+  }
+  .chip-card .chip-visual::after{
+    content:'DIE'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:.65rem; letter-spacing:.2em; color:rgba(var(--volt)/.7);
+  }
+
+  /* ---------- open source ---------- */
+  .repo-card{ display:flex; flex-direction:column; height:100%; text-decoration:none; }
+  .repo-name{ font-family:var(--font-mono); font-size:.95rem; color:rgb(var(--signal)); font-weight:600; }
+  .repo-desc{ margin-top:8px; color:var(--text-dim); font-size:.85rem; line-height:1.5; }
+  .repo-meta{ margin-top:auto; padding-top:16px; font-family:var(--font-mono); font-size:.68rem; color:var(--text-faint); display:flex; align-items:center; gap:8px;}
+  .repo-meta .lang-dot{ width:8px; height:8px; border-radius:50%; background:rgb(var(--signal)); }
+
+  /* ---------- startups ---------- */
+  .startup-hero{
+    display:flex; gap:26px; align-items:center; flex-wrap:wrap;
+    border:1px solid rgba(var(--spark)/.3); border-radius:16px; padding:28px;
+    background:linear-gradient(135deg, rgba(var(--spark)/.08), rgba(var(--volt)/.08));
+    margin-bottom:26px;
+  }
+  .startup-mark{
+    width:64px; height:64px; border-radius:14px; flex:0 0 auto;
+    background:linear-gradient(135deg, rgb(var(--spark)), rgb(var(--volt)));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:800; font-size:1.4rem; color:#100615;
+  }
+  .startup-hero h3{ font-size:1.35rem; color:#ffd7e2; }
+  .startup-hero .sub{ color:var(--text-dim); font-size:.92rem; margin-top:6px; max-width:56ch; }
+  .startup-hero .born{
+    margin-top:10px; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:rgb(var(--spark));
+  }
+
+  /* ---------- tools ---------- */
+  .tool-cat{ }
+  .tool-cat h4{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:rgb(var(--signal)); margin-bottom:14px; }
+  .tool-badges{ display:flex; flex-wrap:wrap; gap:8px; }
+  .tbadge{ font-family:var(--font-mono); font-size:.76rem; padding:6px 12px; border-radius:20px; font-weight:500; border:1px solid; }
+  .tbadge.cadence{ color:#ffcf86; border-color:rgba(255,190,90,.35); background:rgba(255,190,90,.08); }
+  .tbadge.synopsys{ color:#9cf2c0; border-color:rgba(120,230,160,.3); background:rgba(120,230,160,.06); }
+  .tbadge.other{ color:var(--text-dim); border-color:var(--border); background:rgba(255,255,255,.04); }
+
+  /* ---------- faculty ---------- */
+  .fc{ text-align:center; }
+  .fc-av{
+    width:64px; height:64px; margin:0 auto 16px; border-radius:50%;
+    background:linear-gradient(135deg, rgb(var(--signal)), rgb(var(--volt)));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:800; font-size:1.3rem; color:#04060b;
+  }
+  .fc h3{ font-size:1.05rem; }
+  .fc .role{ margin-top:6px; color:var(--text-dim); font-size:.82rem; line-height:1.5; }
+  .fc .pi-tag{ display:inline-block; margin-top:10px; }
+
+  /* ---------- network ---------- */
+  .tag-cloud{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+  .ntag{
+    padding:9px 18px; border-radius:999px; font-size:.85rem; font-weight:500;
+    background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--text-dim);
+    transition:all .2s;
+  }
+  .ntag:hover{ border-color:rgba(var(--signal)/.5); color:rgb(var(--signal)); background:rgba(var(--signal)/.08); }
+
+  /* ---------- footer ---------- */
+  footer{ border-top:1px solid var(--border); padding-block:56px 40px; text-align:center; background:var(--bg-raised); }
+  .footer-brand{ display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; }
+  .footer-brand img{ width:36px; height:36px; object-fit:contain; }
+  .footer-brand span{ font-family:var(--font-display); font-weight:700; font-size:1.05rem; }
+  footer p{ color:var(--text-dim); font-size:.86rem; margin-block:4px; }
+  .footer-links{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-block:20px; }
+  .footer-links a{ font-size:.84rem; color:var(--text-dim); text-decoration:none; }
+  .footer-links a:hover{ color:rgb(var(--signal)); }
+  .footer-copy{ margin-top:22px; font-family:var(--font-mono); font-size:.7rem; color:var(--text-faint); }
+
+  .reveal{ animation:rise .7s ease both; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px);} to{ opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){ .reveal{ animation:none; } }
+</style>
+
+<header class="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="#top">
+      <img src="logo.png" alt="Chip2System Lab logo">
+      <span class="brand-text"><span>Chip2System Lab</span><small>SMDP‑C2SD · TIET PATIALA</small></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#research">Research</a>
+      <a href="#projects">Projects</a>
+      <a href="#tapeouts">Tapeouts</a>
+      <a href="#startups">Startups</a>
+      <a href="#tools">Tools</a>
+      <a href="#faculty">Faculty</a>
+    </nav>
+    <a class="btn btn-ghost" href="https://github.com/chipc2svlsilab" target="_blank" rel="noopener">GitHub →</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-inner reveal">
+      <div class="badge"><span class="dot"></span> Funded by MeitY, Government of India</div>
+      <h1>Logic, <span class="grad">verified.</span><br>Silicon, <span class="grad">fabricated.</span><br>Startups, <span class="grad">launched.</span></h1>
+      <p class="tagline">VLSI Chips‑to‑Startup Lab — from RTL to real silicon to real companies. RISC‑V cores, FPGA‑accelerated autonomy, and four fabricated ASICs, built by students at Thapar Institute.</p>
+      <p class="inst">DEPT. OF ELECTRONICS &amp; COMMUNICATION ENGINEERING &nbsp;·&nbsp; THAPAR INSTITUTE OF ENGINEERING &amp; TECHNOLOGY, PATIALA</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#projects">Explore Projects →</a>
+        <a class="btn btn-ghost" href="#tapeouts">Our Silicon</a>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat"><div class="stat-n">4</div><div class="stat-l">Tapeouts</div></div>
+        <div class="stat"><div class="stat-n">44+</div><div class="stat-l">Papers</div></div>
+        <div class="stat"><div class="stat-n">11+</div><div class="stat-l">Active Projects</div></div>
+        <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Industry Partners</div></div>
+        <div class="stat"><div class="stat-n">6</div><div class="stat-l">Research Domains</div></div>
+        <div class="stat"><div class="stat-n">5+</div><div class="stat-l">Startups</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="research">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">What We Build</div>
+        <h2>Research themes</h2>
+        <p class="sub">Six pillars spanning the full stack of chip design — from silicon physics to the intelligent systems running on top of it.</p>
+      </div>
+
+      <div class="flow-strip">
+        <div class="flow-step"><span class="flow-idx">00</span><span class="flow-name">Idea</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">01</span><span class="flow-name">RTL Design</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">02</span><span class="flow-name">Synthesis</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">03</span><span class="flow-name">Place &amp; Route</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">04</span><span class="flow-name">Verification</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">05</span><span class="flow-name">Tapeout</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">06</span><span class="flow-name">Silicon</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="flow-idx">07</span><span class="flow-name">Startup</span></div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card" style="--ac:rgb(var(--volt))">
+          <span class="card-code">SIG_AI_SI</span>
+          <h3>AI × Silicon</h3>
+          <div class="tags">
+            <span class="tag">Neural nets in hardware</span>
+            <span class="tag">AI-powered comparators</span>
+            <span class="tag">On-chip ML</span>
+            <span class="tag">Neuromorphic compute</span>
+          </div>
+        </div>
+        <div class="card" style="--ac:rgb(var(--signal))">
+          <span class="card-code">SIG_UAV_AUTO</span>
+          <h3>Autonomous Drones</h3>
+          <div class="tags">
+            <span class="tag">FPGA flight control</span>
+            <span class="tag">Self-flying bicopters</span>
+            <span class="tag">Anti-drone systems</span>
+            <span class="tag">Swarm intelligence</span>
+          </div>
+        </div>
+        <div class="card" style="--ac:rgb(var(--spark))">
+          <span class="card-code">SIG_QNT_PHOT</span>
+          <h3>Quantum &amp; Photonics</h3>
+          <div class="tags">
+            <span class="tag">Silicon photonics</span>
+            <span class="tag">Quantum processors</span>
+            <span class="tag">Photonic circuits</span>
+            <span class="tag">Hybrid quantum systems</span>
+          </div>
+        </div>
+        <div class="card" style="--ac:rgb(var(--signal))">
+          <span class="card-code">SIG_EDA_AI</span>
+          <h3>Smart EDA Tools</h3>
+          <div class="tags">
+            <span class="tag">LLM-assisted design</span>
+            <span class="tag">Autonomous workflows</span>
+            <span class="tag">AI circuit optimization</span>
+            <span class="tag">Intelligent verification</span>
+          </div>
+        </div>
+        <div class="card" style="--ac:rgb(var(--spark))">
+          <span class="card-code">SIG_DSP</span>
+          <h3>Signal Processing</h3>
+          <div class="tags">
+            <span class="tag">200 MS/s flash ADC</span>
+            <span class="tag">Custom ASICs</span>
+            <span class="tag">Crypto chips</span>
+            <span class="tag">DSP accelerators</span>
+          </div>
+        </div>
+        <div class="card" style="--ac:rgb(var(--volt))">
+          <span class="card-code">SIG_IOT_EDGE</span>
+          <h3>IoT &amp; Edge AI</h3>
+          <div class="tags">
+            <span class="tag">Edge AI devices</span>
+            <span class="tag">Ultra-low-power chips</span>
+            <span class="tag">Secure hardware</span>
+            <span class="tag">System-on-chip</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONGOING PROJECTS -->
+  <section id="projects" style="background:var(--bg-raised); border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">On The Bench Right Now</div>
+        <h2>Ongoing projects</h2>
+        <p class="sub">Undergrad and PhD work in active development, from FPGA stereo-vision cameras to an in-house RISC-V flight controller.</p>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card" style="--ac:rgb(var(--signal))">
+          <span class="card-code">PRJ / DEPTH-CAM</span>
+          <h3>Depth Camera on Reconfigurable Hardware</h3>
+          <p class="desc">FPGA-accelerated stereo vision that replaces GPU-dependent depth sensors (~₹50,000 stock cost) with a low-power, customizable pipeline on a PYNQ‑Z2 board and dual USB webcams.</p>
+          <div class="tags"><span class="tag accent">PYNQ Z2</span><span class="tag">Stereo Vision</span><span class="tag">FPGA Accel</span></div>
+          <div class="card-foot-row"><span class="tag status">Team · 2 UG</span></div>
+        </div>
+
+        <div class="card" style="--ac:rgb(var(--volt))">
+          <span class="card-code">PRJ / OBJ-DEPTH</span>
+          <h3>Embedded Real‑Time Object‑Level Depth Estimation</h3>
+          <p class="desc">YOLOv8 segmentation plus Hungarian matching drives mask-based stereo disparity, delivering real-time per-object depth on a Raspberry Pi 5 — no GPU required.</p>
+          <div class="tags"><span class="tag accent">YOLOv8</span><span class="tag">Raspberry Pi 5</span><span class="tag">Stereo Matching</span></div>
+          <div class="card-foot-row"><span class="tag status">Team · 2 UG</span></div>
+        </div>
+
+        <div class="card" style="--ac:rgb(var(--spark))">
+          <span class="card-code">PRJ / FC-FPGA</span>
+          <h3>Indigenous FPGA Flight Controller for UAV</h3>
+          <p class="desc">A secure, domestically built flight controller on a Xilinx Basys3 board with a custom STM32 PCB, closing the import-dependency and data-sovereignty gaps in off-the-shelf UAV controllers.</p>
+          <div class="tags"><span class="tag accent">Basys3</span><span class="tag">STM32 PCB</span><span class="tag">RF + IMU</span></div>
+          <div class="card-foot-row"><span class="tag">In-house build</span></div>
+        </div>
+
+        <div class="card" style="--ac:rgb(var(--signal))">
+          <span class="card-code">PRJ / FC-RISCV</span>
+          <h3>RISC‑V Flight Controller — Alpana64v0</h3>
+          <p class="desc">The same flight-control loop rebuilt around Alpana64v0, an in-house 64-bit floating-point RISC-V core (RV64 IMAFD), running live on an Arty A7 board.</p>
+          <div class="tags"><span class="tag accent">RV64 IMAFD</span><span class="tag">Arty A7</span><span class="tag">In-house core</span></div>
+          <div class="card-foot-row"><span class="tag status">Ongoing</span></div>
+        </div>
+
+        <div class="card" style="--ac:rgb(var(--volt))">
+          <span class="card-code">PRJ / LIDAR-BEV</span>
+          <h3>AI‑Accelerated LiDAR BEV Semantic Segmentation</h3>
+          <p class="desc">A FINN-friendly quantized CNN turns raw LiDAR point clouds into real-time bird's-eye-view semantic maps for driving and robotics decisions, deployed on affordable Zynq/PYNQ boards.</p>
+          <div class="tags"><span class="tag accent">FINN</span><span class="tag">Zynq / PYNQ</span><span class="tag">Quantized CNN</span></div>
+          <div class="card-foot-row"><span class="tag">No GPU required</span></div>
+        </div>
+
+        <div class="card" style="--ac:rgb(var(--spark))">
+          <span class="card-code">PRJ / ROBODOG</span>
+          <h3>Robo Dog — Intelligent Quadruped Robot</h3>
+          <p class="desc">An IMU-balanced, modular quadruped with dual manual (FlySky RC) and autonomous control modes, built for robotics competitions, inspection and research demos.</p>
+          <div class="tags"><span class="tag accent">IMU Control</span><span class="tag">STM32 + FPGA</span><span class="tag">FlySky RC</span></div>
+          <div class="card-foot-row"><span class="tag status">Team · 5 UG · Ongoing</span></div>
+        </div>
+      </div>
+
+      <div class="side-list">
+        <div class="side-row"><span class="idx">01</span><p><strong>FPGA multi-core NPU + RISC-V processor</strong> — combined NPU and RISC-V floating-point cores tracked for autonomous UAVs and UAV swarms.</p></div>
+        <div class="side-row"><span class="idx">02</span><p><strong>AI-enabled autonomous UAV navigation</strong> in unseen, cluttered environments — PhD research, ongoing.</p></div>
+        <div class="side-row"><span class="idx">03</span><p><strong>FPGA-based 3D MIMO FMCW radar</strong> — streaming FFT accelerator for real-time radar processing.</p></div>
+        <div class="side-row"><span class="idx">04</span><p><strong>Low-bandwidth AI video streaming for UAVs</strong> (Tx/Rx) — demonstrated on FPGA.</p></div>
+        <div class="side-row"><span class="idx">05</span><p><strong>VORTEX</strong> — an SNN-based processor built for multi-sensor, edge-AI applications.</p></div>
+      </div>
+
+      <div class="bench-strip">
+        <span class="lbl">Also off the bench</span>
+        <span class="tag">First quadcopter iteration</span>
+        <span class="tag">In-house 2-layer PCB design</span>
+        <span class="tag">Custom load-cell digital scale</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAPEOUTS -->
+  <section id="tapeouts">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">Silicon Hall of Fame</div>
+        <h2>Chips we've fabricated</h2>
+        <p class="sub">Real silicon, fabricated at the Semiconductor Laboratory (SCL), Mohali — one of the few university labs in India with actual tapeout credentials.</p>
+      </div>
+
+      <div class="tapeout-banner">V<sub>DD</sub> = <b>1.8 V</b> &nbsp;·&nbsp; Process: <b>SCL 180nm CMOS</b> &nbsp;·&nbsp; Program: <b>SMDP‑C2SD, MeitY</b></div>
+
+      <div class="grid grid-2">
+        <div class="card chip-card" style="--ac:rgb(var(--volt))">
+          <div class="chip-visual"></div>
+          <span class="card-code">TAPEOUT 01</span>
+          <h3>6-bit 200 MS/s Flash ADC ASIC with On-Chip PLL</h3>
+          <p class="desc">High-speed analog-to-digital converter with an integrated phase-locked loop for on-chip clock generation.</p>
+          <div class="tags"><span class="tag accent">Flash ADC</span><span class="tag">On-chip PLL</span></div>
+        </div>
+        <div class="card chip-card" style="--ac:rgb(var(--signal))">
+          <div class="chip-visual"></div>
+          <span class="card-code">TAPEOUT 02</span>
+          <h3>All-Digital 6-bit 200 MS/s Flash ADC ASIC with On-Chip PLL</h3>
+          <p class="desc">A fully digital re-implementation of the same ADC architecture, trading analog complexity for digital-friendly scaling.</p>
+          <div class="tags"><span class="tag accent">All-digital</span><span class="tag">Flash ADC</span></div>
+        </div>
+        <div class="card chip-card" style="--ac:rgb(var(--spark))">
+          <div class="chip-visual"></div>
+          <span class="card-code">TAPEOUT 03</span>
+          <h3>AES Encryption / Decryption Chip with DFT</h3>
+          <p class="desc">Hardware AES cipher core with Design-for-Test structures inserted for post-silicon fault coverage.</p>
+          <div class="tags"><span class="tag accent">AES</span><span class="tag">DFT</span></div>
+        </div>
+        <div class="card chip-card" style="--ac:rgb(var(--volt))">
+          <div class="chip-visual"></div>
+          <span class="card-code">TAPEOUT 04</span>
+          <h3>Differential Amplifiers &amp; Low-Power OpAmp</h3>
+          <p class="desc">Analog building blocks — differential amplifier stages and a low-power operational amplifier — for downstream mixed-signal designs.</p>
+          <div class="tags"><span class="tag accent">Analog IP</span><span class="tag">Low power</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OPEN SOURCE -->
+  <section style="background:var(--bg-raised); border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">github.com/chipc2svlsilab</div>
+        <h2>Open source</h2>
+        <p class="sub">Design flows, IP and tooling we publish and maintain in the open.</p>
+      </div>
+      <div class="grid grid-3">
+        <a class="card repo-card" style="--ac:rgb(var(--signal))" href="https://github.com/chipc2svlsilab/RTL_TO_GDSII-picorv32" target="_blank" rel="noopener">
+          <span class="repo-name">RTL_TO_GDSII‑picorv32</span>
+          <p class="repo-desc">Complete RTL-to-GDSII implementation of the PicoRV32 RISC-V core using Cadence Xcelium, Genus, Innovus and Tempus (180nm), with 100 MHz timing closure.</p>
+          <div class="repo-meta"><span class="lang-dot"></span> Verilog</div>
+        </a>
+        <a class="card repo-card" style="--ac:rgb(var(--volt))" href="https://github.com/chipc2svlsilab/LZ77_AXI-Stream_Decompressor" target="_blank" rel="noopener">
+          <span class="repo-name">LZ77_AXI‑Stream_Decompressor</span>
+          <p class="repo-desc">LZ77 decompressor in SystemVerilog with an AXI-Stream wrapper, FIFO backpressure handling and self-checking simulation.</p>
+          <div class="repo-meta"><span class="lang-dot" style="background:rgb(var(--volt))"></span> SystemVerilog</div>
+        </a>
+        <a class="card repo-card" style="--ac:rgb(var(--spark))" href="https://github.com/chipc2svlsilab/OPENSOURCE_CHIP_DESIGN_TOOL_SETUP" target="_blank" rel="noopener">
+          <span class="repo-name">OPENSOURCE_CHIP_DESIGN_TOOL_SETUP</span>
+          <p class="repo-desc">Automated setup for open-source chip design tools on WSL Ubuntu — installs OpenLane 2, OSS CAD Suite (Yosys, Verilator, Icarus), KLayout, ngspice and OpenSTA in one command.</p>
+          <div class="repo-meta"><span class="lang-dot" style="background:rgb(var(--spark))"></span> Shell</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STARTUPS -->
+  <section id="startups">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">Startup Ecosystem</div>
+        <h2>From lab to market</h2>
+        <p class="sub">We don't just publish papers — we spin out companies. The full journey from RTL to registered startup happens inside this lab.</p>
+      </div>
+
+      <div class="startup-hero">
+        <div class="startup-mark">B</div>
+        <div>
+          <h3>BhoomiIQ</h3>
+          <p class="sub">A deep-tech startup grown out of the Chip2System Lab ecosystem, applying semiconductor innovation to real-world problems.</p>
+          <div class="born">★ Born in this lab · TIET Patiala</div>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card" style="--ac:rgb(var(--signal))">
+          <span class="card-code">STARTUP</span>
+          <h3>LumiCircuits</h3>
+          <p class="desc">AI-powered autonomous EDA tools with integrated LLMs for intelligent chip-design workflows.</p>
+        </div>
+        <div class="card" style="--ac:rgb(var(--volt))">
+          <span class="card-code">STARTUP</span>
+          <h3>DroneX Systems</h3>
+          <p class="desc">FPGA-based autonomous drones for defence and commercial applications.</p>
+        </div>
+        <div class="card" style="--ac:rgb(var(--spark))">
+          <span class="card-code">STARTUP</span>
+          <h3>Defence Tech</h3>
+          <p class="desc">Anti-drone systems and secure communication solutions for Indian defence.</p>
+        </div>
+        <div class="card" style="--ac:rgb(var(--signal))">
+          <span class="card-code">STARTUP</span>
+          <h3>EdgeAI Ventures</h3>
+          <p class="desc">AI-integrated analog circuits and edge-computing chips for IoT applications.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section id="tools" style="background:var(--bg-raised); border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">Infrastructure</div>
+        <h2>EDA tools &amp; technology stack</h2>
+        <p class="sub">The same industry-grade RTL-to-GDSII flow used at leading semiconductor companies worldwide.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card tool-cat" style="--ac:rgb(var(--signal))">
+          <h4>Cadence Design Suite</h4>
+          <div class="tool-badges">
+            <span class="tbadge cadence">Xcelium</span>
+            <span class="tbadge cadence">Genus</span>
+            <span class="tbadge cadence">Innovus</span>
+            <span class="tbadge cadence">Tempus</span>
+          </div>
+        </div>
+        <div class="card tool-cat" style="--ac:rgb(var(--volt))">
+          <h4>Synopsys &amp; Mentor</h4>
+          <div class="tool-badges">
+            <span class="tbadge synopsys">Design Compiler</span>
+            <span class="tbadge synopsys">Mentor Graphics</span>
+          </div>
+        </div>
+        <div class="card tool-cat" style="--ac:rgb(var(--spark))">
+          <h4>Hardware &amp; Platforms</h4>
+          <div class="tool-badges">
+            <span class="tbadge other">Xilinx / Intel FPGA</span>
+            <span class="tbadge other">RISC-V</span>
+            <span class="tbadge other">SystemVerilog / VHDL</span>
+            <span class="tbadge other">SCL 180nm CMOS</span>
+            <span class="tbadge other">OpenLane 2</span>
+            <span class="tbadge other">LLM-assisted EDA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FACULTY -->
+  <section id="faculty">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow mono-label">VLSI Chips-to-Startup Lab · Supported by MeitY, Govt. of India</div>
+        <h2>Faculty in charge</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card fc" style="--ac:rgb(var(--signal))">
+          <div class="fc-av">A</div>
+          <h3>Dr. Alpana Agarwal</h3>
+          <p class="role">Principal Investigator · SMDP‑C2SD Lab<br>ECE Department, TIET</p>
+        </div>
+        <div class="card fc" style="--ac:rgb(var(--volt))">
+          <div class="fc-av">M</div>
+          <h3>Dr. Manu Bansal</h3>
+          <p class="role">Associate Professor, DECE<br>Co‑PI, SMDP‑C2SD, MeitY GoI</p>
+        </div>
+        <div class="card fc" style="--ac:rgb(var(--spark))">
+          <div class="fc-av">A</div>
+          <h3>Dr. Anil Singh</h3>
+          <p class="role">Associate Professor, DECE<br>Co‑PI, C2S, MeitY GoI</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NETWORK -->
+  <section style="background:var(--bg-raised); border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="section-head center">
+        <div class="eyebrow mono-label">Collaborations</div>
+        <h2>Our network</h2>
+      </div>
+      <div class="tag-cloud">
+        <span class="ntag">Indian Defence Sector</span>
+        <span class="ntag">SCL Mohali Foundry</span>
+        <span class="ntag">MeitY — Govt. of India</span>
+        <span class="ntag">Academic Institutions</span>
+        <span class="ntag">Semiconductor Industry</span>
+        <span class="ntag">Deep-Tech Startups</span>
+        <span class="ntag">Global Research Labs</span>
+        <span class="ntag">Hardware Companies</span>
+        <span class="ntag">CEERI Pilani</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-brand">
+      <img src="logo.png" alt="Chip2System Lab logo">
+      <span>Chip2System Lab</span>
+    </div>
+    <p><strong>SMDP‑C2SD — Thapar Institute of Engineering &amp; Technology</strong></p>
+    <p>Department of ECE · Patiala, Punjab 147004 · India</p>
+    <p>Empowered by MeitY, Government of India</p>
+    <div class="footer-links">
+      <a href="https://github.com/chipc2svlsilab" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/company/111240020" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+    <div class="footer-copy">© 2026 SMDP‑C2SD Lab · Building India's Semiconductor Future</div>
+  </div>
+</footer>
+
+</body>
+</html>
