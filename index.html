@@ -305,9 +305,37 @@
     display:flex; align-items:center; justify-content:center;
     font-family:var(--font-display); font-weight:800; font-size:1.3rem; color:#04060b;
   }
+  .fc-photo{
+    width:88px; height:88px; margin:0 auto 16px; border-radius:50%;
+    object-fit:cover; border:2px solid var(--border-hi);
+  }
   .fc h3{ font-size:1.05rem; }
   .fc .role{ margin-top:6px; color:var(--text-dim); font-size:.82rem; line-height:1.5; }
   .fc .pi-tag{ display:inline-block; margin-top:10px; }
+  .fc-link{
+    display:inline-block; margin-top:12px; font-family:var(--font-mono); font-size:.76rem;
+    color:rgb(var(--signal)); text-decoration:none; border-bottom:1px solid rgba(var(--signal)/.4);
+  }
+  .fc-link:hover{ border-color:rgb(var(--signal)); }
+
+  /* ---------- in memoriam ---------- */
+  #memoriam{ padding-block:56px 0; }
+  .memoriam-card{
+    max-width:640px; margin-inline:auto; text-align:center;
+    border:1px solid rgba(255,255,255,.12); border-radius:18px;
+    padding:48px 32px; position:relative;
+    background:radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.05), transparent 70%), rgba(255,255,255,.02);
+  }
+  .memoriam-portrait{
+    width:64px; height:64px; margin:0 auto 20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; font-size:1.3rem;
+    color:var(--text-dim); background:rgba(255,255,255,.06); border:1px solid var(--border-hi);
+  }
+  .memoriam-eyebrow{ color:var(--text-faint); }
+  .memoriam-name{ margin-top:10px; font-size:1.5rem; letter-spacing:-.01em; }
+  .memoriam-role{ margin-top:8px; color:var(--text-dim); font-size:.88rem; }
+  .memoriam-note{ margin-top:18px; color:var(--text-dim); font-size:.95rem; line-height:1.65; max-width:52ch; margin-inline:auto; font-style:italic; }
 
   /* ---------- network ---------- */
   .tag-cloud{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
@@ -370,9 +398,9 @@
         <div class="stat"><div class="stat-n">4</div><div class="stat-l">Tapeouts</div></div>
         <div class="stat"><div class="stat-n">44+</div><div class="stat-l">Papers</div></div>
         <div class="stat"><div class="stat-n">11+</div><div class="stat-l">Active Projects</div></div>
-        <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Industry Partners</div></div>
+        <div class="stat"><div class="stat-n">3</div><div class="stat-l">Patents Granted</div></div>
         <div class="stat"><div class="stat-n">6</div><div class="stat-l">Research Domains</div></div>
-        <div class="stat"><div class="stat-n">5+</div><div class="stat-l">Startups</div></div>
+        <div class="stat"><div class="stat-n">3</div><div class="stat-l">Startups</div></div>
       </div>
     </div>
 
@@ -655,7 +683,7 @@
               </g>
             </svg>
           </div>
-          <span class="card-code">TAPEOUT 01</span>
+          <span class="card-code">EDU0043</span>
           <h3>6-bit 200 MS/s Flash ADC ASIC with On-Chip PLL</h3>
           <p class="desc">High-speed analog-to-digital converter with an integrated phase-locked loop for on-chip clock generation.</p>
           <div class="tags"><span class="tag accent">Flash ADC</span><span class="tag">On-chip PLL</span></div>
@@ -673,12 +701,30 @@
               <text x="12" y="9" font-family="JetBrains Mono, monospace" font-size="7.5" letter-spacing=".5" fill="rgba(79,212,255,.7)">ALL-DIGITAL LOGIC</text>
             </svg>
           </div>
-          <span class="card-code">TAPEOUT 02</span>
-          <h3>All-Digital 6-bit 200 MS/s Flash ADC ASIC with On-Chip PLL</h3>
+          <span class="card-code">EDU0088</span>
+          <h3>All-Digital 6-bit 200 MS/s Flash ADC</h3>
           <p class="desc">A fully digital re-implementation of the same ADC architecture, trading analog complexity for digital-friendly scaling.</p>
           <div class="tags"><span class="tag accent">All-digital</span><span class="tag">Flash ADC</span></div>
         </div>
         <div class="card chip-card" style="--ac:rgb(var(--spark))">
+          <div class="chip-visual">
+            <svg viewBox="0 0 260 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g fill="rgb(255,100,138)" opacity=".85">
+                <circle cx="30" cy="16" r="3"/><circle cx="54" cy="16" r="3"/><circle cx="78" cy="16" r="3"/><circle cx="102" cy="16" r="3"/>
+                <circle cx="30" cy="36" r="3"/><circle cx="54" cy="36" r="3"/><circle cx="78" cy="36" r="3"/><circle cx="102" cy="36" r="3"/>
+                <circle cx="30" cy="56" r="3"/><circle cx="54" cy="56" r="3"/><circle cx="78" cy="56" r="3"/><circle cx="102" cy="56" r="3"/>
+              </g>
+              <path d="M30 16 L102 16 L30 36 L102 36 L30 56 L102 56" stroke="rgba(150,130,255,.55)" stroke-width="1.2" fill="none"/>
+              <text x="130" y="30" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1" fill="rgba(79,212,255,.75)">PRESENT</text>
+              <text x="130" y="42" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1" fill="rgba(79,212,255,.75)">CIPHER</text>
+            </svg>
+          </div>
+          <span class="card-code">EDU0084</span>
+          <h3>PRESENT Cipher Crypto Chip</h3>
+          <p class="desc">A lightweight-cryptography ASIC implementing the PRESENT block cipher, built for encrypting Hindi text.</p>
+          <div class="tags"><span class="tag accent">PRESENT cipher</span><span class="tag">Lightweight crypto</span></div>
+        </div>
+        <div class="card chip-card" style="--ac:rgb(var(--volt))">
           <div class="chip-visual">
             <svg viewBox="0 0 260 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <g fill="rgb(255,100,138)" opacity=".85">
@@ -696,32 +742,10 @@
               <text x="106" y="52" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1" fill="rgba(79,212,255,.75)">(DFT)</text>
             </svg>
           </div>
-          <span class="card-code">TAPEOUT 03</span>
-          <h3>AES Encryption / Decryption Chip with DFT</h3>
-          <p class="desc">Hardware AES cipher core with Design-for-Test structures inserted for post-silicon fault coverage.</p>
-          <div class="tags"><span class="tag accent">AES</span><span class="tag">DFT</span></div>
-        </div>
-        <div class="card chip-card" style="--ac:rgb(var(--volt))">
-          <div class="chip-visual">
-            <svg viewBox="0 0 260 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <g stroke="rgb(150,130,255)" stroke-width="1.6" fill="none" stroke-linejoin="round">
-                <polygon points="70,10 70,62 130,36" fill="rgba(150,130,255,.06)"/>
-              </g>
-              <g stroke="rgb(79,212,255)" stroke-width="1.4" fill="none">
-                <line x1="30" y1="22" x2="70" y2="22"/><line x1="30" y1="50" x2="70" y2="50"/>
-                <line x1="130" y1="36" x2="180" y2="36"/>
-                <line x1="16" y1="22" x2="30" y2="22"/><line x1="16" y1="50" x2="30" y2="50"/>
-              </g>
-              <text x="42" y="19" font-family="JetBrains Mono, monospace" font-size="10" fill="rgb(255,100,138)">+</text>
-              <text x="42" y="55" font-family="JetBrains Mono, monospace" font-size="10" fill="rgba(255,255,255,.6)">−</text>
-              <text x="150" y="30" font-family="JetBrains Mono, monospace" font-size="7.5" letter-spacing=".5" fill="rgba(79,212,255,.75)">VOUT</text>
-              <text x="188" y="58" font-family="JetBrains Mono, monospace" font-size="7.5" letter-spacing=".5" fill="rgba(255,255,255,.5)">LOW-POWER OPAMP</text>
-            </svg>
-          </div>
-          <span class="card-code">TAPEOUT 04</span>
-          <h3>Differential Amplifiers &amp; Low-Power OpAmp</h3>
-          <p class="desc">Analog building blocks — differential amplifier stages and a low-power operational amplifier — for downstream mixed-signal designs.</p>
-          <div class="tags"><span class="tag accent">Analog IP</span><span class="tag">Low power</span></div>
+          <span class="card-code">EDU141_0</span>
+          <h3>PRESENT Cipher + DFT Insertion</h3>
+          <p class="desc">The PRESENT cipher core with Design-for-Test structures inserted for post-silicon fault coverage.</p>
+          <div class="tags"><span class="tag accent">PRESENT cipher</span><span class="tag">DFT</span></div>
         </div>
       </div>
     </div>
@@ -773,26 +797,16 @@
         </div>
       </div>
 
-      <div class="grid grid-3">
-        <div class="card" style="--ac:rgb(var(--signal))">
-          <span class="card-code">STARTUP</span>
-          <h3>LumiCircuits</h3>
-          <p class="desc">AI-powered autonomous EDA tools with integrated LLMs for intelligent chip-design workflows.</p>
-        </div>
+      <div class="grid grid-2">
         <div class="card" style="--ac:rgb(var(--volt))">
           <span class="card-code">STARTUP</span>
-          <h3>DroneX Systems</h3>
-          <p class="desc">FPGA-based autonomous drones for defence and commercial applications.</p>
+          <h3>Toying Ideas</h3>
+          <p class="desc">A 3D-printing store turning ideas into custom, made-to-order physical objects.</p>
         </div>
         <div class="card" style="--ac:rgb(var(--spark))">
           <span class="card-code">STARTUP</span>
-          <h3>Defence Tech</h3>
-          <p class="desc">Anti-drone systems and secure communication solutions for Indian defence.</p>
-        </div>
-        <div class="card" style="--ac:rgb(var(--signal))">
-          <span class="card-code">STARTUP</span>
-          <h3>EdgeAI Ventures</h3>
-          <p class="desc">AI-integrated analog circuits and edge-computing chips for IoT applications.</p>
+          <h3>Silica Smith</h3>
+          <p class="desc">The lab's third startup spinout, building on the chip-design expertise developed here.</p>
         </div>
       </div>
     </div>
@@ -838,6 +852,19 @@
     </div>
   </section>
 
+  <!-- IN MEMORIAM -->
+  <section id="memoriam">
+    <div class="wrap">
+      <div class="memoriam-card">
+        <div class="memoriam-portrait">A</div>
+        <div class="mono-label memoriam-eyebrow">In Memoriam</div>
+        <h2 class="memoriam-name">Dr. Alpana Agarwal</h2>
+        <p class="memoriam-role">Founding Principal Investigator · SMDP‑C2SD Lab · ECE Department, TIET</p>
+        <p class="memoriam-note">This lab exists because she believed students could take an idea all the way to silicon. Every tapeout, every startup that has come out of this room carries her vision forward.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- FACULTY -->
   <section id="faculty">
     <div class="wrap">
@@ -845,21 +872,17 @@
         <div class="eyebrow mono-label">VLSI Chips-to-Startup Lab · Supported by MeitY, Govt. of India</div>
         <h2>Faculty in charge</h2>
       </div>
-      <div class="grid grid-3">
-        <div class="card fc" style="--ac:rgb(var(--signal))">
-          <div class="fc-av">A</div>
-          <h3>Dr. Alpana Agarwal</h3>
-          <p class="role">Principal Investigator · SMDP‑C2SD Lab<br>ECE Department, TIET</p>
-        </div>
+      <div class="grid grid-2">
         <div class="card fc" style="--ac:rgb(var(--volt))">
-          <div class="fc-av">M</div>
+          <img class="fc-photo" src="manu-bansal.jpg" alt="Dr. Manu Bansal">
           <h3>Dr. Manu Bansal</h3>
           <p class="role">Associate Professor, DECE<br>Co‑PI, SMDP‑C2SD, MeitY GoI</p>
         </div>
         <div class="card fc" style="--ac:rgb(var(--spark))">
-          <div class="fc-av">A</div>
+          <img class="fc-photo" src="anil-singh.jpg" alt="Dr. Anil Singh">
           <h3>Dr. Anil Singh</h3>
           <p class="role">Associate Professor, DECE<br>Co‑PI, C2S, MeitY GoI</p>
+          <a class="fc-link" href="https://vlsiworks.in" target="_blank" rel="noopener">vlsiworks.in</a>
         </div>
       </div>
     </div>
@@ -873,16 +896,13 @@
         <h2>Our network</h2>
       </div>
       <div class="tag-cloud">
-        <span class="ntag">Indian Defence Sector</span>
         <span class="ntag">SCL Mohali Foundry</span>
         <span class="ntag">MeitY — Govt. of India</span>
-        <span class="ntag">Academic Institutions</span>
-        <span class="ntag">Semiconductor Industry</span>
-        <span class="ntag">Deep-Tech Startups</span>
-        <span class="ntag">Global Research Labs</span>
-        <span class="ntag">Hardware Companies</span>
-        <span class="ntag">CEERI Pilani</span>
+        <span class="ntag">SoCTeamup</span>
+        <span class="ntag">Power Research Consulting</span>
+        <span class="ntag">TinyWires</span>
       </div>
+      <p class="sub" style="text-align:center; margin-top:18px;">Including paid internships, live projects and placements.</p>
     </div>
   </section>
 
